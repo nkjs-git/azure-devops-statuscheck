@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: status-app
+  template:
+    metadata:
+      name: status-app
+      labels:
+        app: status-app
+    spec:
+      containers:
+      - name: status-app
+        image: <image-name>
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DEVOPS_URL
+          valueFrom:
+            secretKeyRef:
+              name: azure-devops-secrets
+              key: DEVOPS_ORG_URL
+        - name: DEVOPS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: azure-devops-secrets
+              key: TOKEN
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: status-app
+spec:
+  selector:
+    app: status-app
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: LoadBalancer
